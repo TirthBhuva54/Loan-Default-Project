@@ -55,7 +55,7 @@ export default function Predict() {
         HasCoSigner: form.HasCoSigner
       };
 
-      const res = await fetch("http://localhost:8000/predict", {
+      const res = await fetch("https://loan-default-backend-c1me.onrender.com/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
