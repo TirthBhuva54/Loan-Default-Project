@@ -1,0 +1,7 @@
+cd D:\ML LOAN PROJECT\loan-default-app\backend
+python -m uvicorn main:app --reload
+
+
+# Frontend (Terminal 2)
+cd loan-default-app/frontend
+npm run dev
