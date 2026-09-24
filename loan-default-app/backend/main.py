@@ -10,7 +10,7 @@ app = FastAPI(title="Loan Default Prediction API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],  # Allow all origins for production
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -99,6 +99,10 @@ def predict(data: LoanInput):
         "probability": round(float(probability) * 100, 2)
     }
 
+@app.get("/")
+def root():
+    return {"message": "Loan Default Prediction API is running", "status": "healthy"}
+
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "healthy"}
