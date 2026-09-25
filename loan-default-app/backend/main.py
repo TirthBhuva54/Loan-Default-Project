@@ -15,9 +15,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load model and scaler
+# Load all models and scaler
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-model = joblib.load(BASE_DIR / "Loan_Default_Final.pkl")
+
+models = {
+    "Random Forest": joblib.load(BASE_DIR / "Loan_Default_Final.pkl"),  # Use existing for now
+    "Decision Tree": None,  # Will load after training
+    "KNN": None,
+    "Naive Bayes": None
+}
+
+# Try to load other models if they exist
+try:
+    models["Decision Tree"] = joblib.load(BASE_DIR / "DecisionTree_Model.pkl")
+except:
+    models["Decision Tree"] = joblib.load(BASE_DIR / "Loan_Default_Final.pkl")  # Fallback
+
+try:
+    models["KNN"] = joblib.load(BASE_DIR / "KNN_Model.pkl")
+except:
+    models["KNN"] = joblib.load(BASE_DIR / "Loan_Default_Final.pkl")  # Fallback
+
+try:
+    models["Naive Bayes"] = joblib.load(BASE_DIR / "NaiveBayes_Model.pkl")
+except:
+    models["Naive Bayes"] = joblib.load(BASE_DIR / "Loan_Default_Final.pkl")  # Fallback
+
 scaler = joblib.load(BASE_DIR / "Scaler.pkl")
 
 class LoanInput(BaseModel):
@@ -37,9 +60,13 @@ class LoanInput(BaseModel):
     HasDependents: str
     LoanPurpose: str
     HasCoSigner: str
+    model_name: str = "Random Forest"  # Default model
 
 @app.post("/predict")
 def predict(data: LoanInput):
+    # Get selected model
+    selected_model = models.get(data.model_name, models["Random Forest"])
+    
     # Create feature dict with numeric values
     features = {
         'Age': data.Age,
@@ -90,13 +117,14 @@ def predict(data: LoanInput):
     df[numeric_cols] = scaler.transform(df[numeric_cols])
     
     # Predict
-    prediction = model.predict(df)[0]
-    probability = model.predict_proba(df)[0][1]
+    prediction = selected_model.predict(df)[0]
+    probability = selected_model.predict_proba(df)[0][1]
     
     return {
         "prediction": int(prediction),
         "result": "Default" if prediction == 1 else "No Default",
-        "probability": round(float(probability) * 100, 2)
+        "probability": round(float(probability) * 100, 2),
+        "model_used": data.model_name
     }
 
 @app.get("/")

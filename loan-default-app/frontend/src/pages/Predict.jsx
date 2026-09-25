@@ -17,7 +17,8 @@ export default function Predict() {
     HasMortgage: "No",
     HasDependents: "No",
     LoanPurpose: "Other",
-    HasCoSigner: "No"
+    HasCoSigner: "No",
+    model_name: "Random Forest"
   });
   
   const [loading, setLoading] = useState(false);
@@ -52,7 +53,8 @@ export default function Predict() {
         HasMortgage: form.HasMortgage,
         HasDependents: form.HasDependents,
         LoanPurpose: form.LoanPurpose,
-        HasCoSigner: form.HasCoSigner
+        HasCoSigner: form.HasCoSigner,
+        model_name: form.model_name
       };
 
       const res = await fetch("https://loan-default-backend-c1me.onrender.com/predict", {
@@ -81,6 +83,19 @@ export default function Predict() {
           </div>
 
           <form onSubmit={handleSubmit}>
+            <div className="form-section">
+              <h3>🤖 Select ML Model</h3>
+              <div className="form-group">
+                <label>Machine Learning Model</label>
+                <select name="model_name" value={form.model_name} onChange={handleChange}>
+                  <option>Random Forest</option>
+                  <option>Decision Tree</option>
+                  <option>KNN</option>
+                  <option>Naive Bayes</option>
+                </select>
+              </div>
+            </div>
+
             <div className="form-section">
               <h3>👤 Personal Information</h3>
               <div className="field-grid">
@@ -199,7 +214,7 @@ export default function Predict() {
             </div>
 
             <div className="form-footer">
-              <p className="model-badge">🌲 Random Forest Model (84.3% Accuracy)</p>
+              <p className="model-badge">🤖 Using: {form.model_name}</p>
               <button type="submit" className="submit-btn" disabled={loading}>
                 {loading ? "⏳ Analyzing..." : "⚡ Calculate Default Risk"}
               </button>
